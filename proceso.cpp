@@ -1,5 +1,7 @@
 #include "proceso.h"
+#include <QStringList>
 
+Proceso::Proceso(){}
 Proceso::Proceso(int tipo, int comunicacion[2], int cantidadHijos){
     this->tipo = tipo;
     this->cantidadHijos = cantidadHijos;
@@ -13,17 +15,38 @@ Proceso::~Proceso(){
 }
 
 void Proceso::iniciarEspera(){
-    char buffer[2];
     int nbytes;
     switch(tipo){
         case 0:{
             while (true){
-                if ((nbytes = read(comunicacion[0], buffer, 2)) > 0){
-                    int cantidadRamas = atoi(buffer);
+                char buffer[5];
+                if ((nbytes = read(comunicacion[0], buffer, 5)) > 0){
+                    QString cadena = QString(buffer);
+                    int cantidadRamas = cadena.split(',').at(0).toInt();
                     if(cantidadRamas > this->cantidadHijos){
-
+                        for(int i = 0; i < (cantidadRamas - this->cantidadHijos); i++){
+                            int comunicacion[2];
+                            pipe(comunicacion);
+                            Proceso procesoHijo = Proceso(1,comunicacion,0);
+                            int pid_p = fork();
+                            if(pid_p < 0 ){
+                                //error
+                            }else if(pid_p == 0){
+                                procesoHijo.iniciarEspera();
+                            }
+                            this->hijos.append(procesoHijo);
+                            this->cantidadHijos++;
+                        }
                     }else if(cantidadRamas < this->cantidadHijos){
-                        //eliminamos las ramas necesarias
+                        for(int i = this->cantidadHijos; i > cantidadRamas; i--){
+                            Proceso procesoHijo = this->hijos.at(i-1);
+                            write(procesoHijo.getComunicacionEnviar(),"-1,00",5);
+                            this->hijos.removeLast();
+                        }
+                        this->cantidadHijos = cantidadRamas;
+                    }
+                    for(int i = 0; i < this->cantidadHijos; i++){
+                        //Por cada rama verificamos que tengan ahora las hojas correspondientes
                     }
                 }
             }
@@ -31,14 +54,40 @@ void Proceso::iniciarEspera(){
         }
         case 1:{
             while (true){
-                if((nbytes = read(comunicacion[0], buffer, 2)) > 0){
-                    int cantidadHojas = atoi(buffer);
-                    if(cantidadHojas < 0 ){ //si queremos eliminar la rama
+                char buffer[5];
+                if((nbytes = read(comunicacion[0], buffer, 5)) > 0){
+                    QString cadena = QString(buffer);
+                    if(cadena.split(',').at(0).toInt() < 0 ){
+                        for (int i = (this->cantidadHijos-1); i >= 0; i++) {
+                            Proceso procesoHijo = this->hijos.at(i);
+                            write(procesoHijo.getComunicacionEnviar(),"-1",2);
+                            this->hijos.removeLast();
+                        }
                         exit(0);
-                    } else if(cantidadHojas > this->cantidadHijos){
-                        //creamos más hojas
-                    }else if(cantidadHojas < this->cantidadHijos){
-                        //eliminamos las hojas necesarias
+                    }else{
+                        int cantidadHojas = cadena.split(',').at(2).toInt();
+                        if(cantidadHojas > this->cantidadHijos){
+                            for(int i = 0; i < (cantidadHojas - this->cantidadHijos); i++){
+                                int comunicacion[2];
+                                pipe(comunicacion);
+                                Proceso procesoHijo = Proceso(2,comunicacion,0);
+                                int pid_p = fork();
+                                if(pid_p < 0 ){
+                                    //error
+                                }else if(pid_p == 0){
+                                    procesoHijo.iniciarEspera();
+                                }
+                                this->hijos.append(procesoHijo);
+                                this->cantidadHijos++;
+                            }
+                        }else if(this->cantidadHijos > cantidadHojas){
+                            for(int i = this->cantidadHijos; i > cantidadHojas; i--){
+                                Proceso procesoHijo = this->hijos.at(i-1);
+                                write(procesoHijo.getComunicacionEnviar(),"-1",2);
+                                this->hijos.removeLast();
+                            }
+                            this->cantidadHijos = cantidadHojas;
+                        }
                     }
                 }
             }
@@ -46,6 +95,7 @@ void Proceso::iniciarEspera(){
         }
         case 2:{
             while (true){
+                char buffer[2];
                 if((nbytes = read(comunicacion[0], buffer, 2)) > 0) exit(0);
             }
             break;

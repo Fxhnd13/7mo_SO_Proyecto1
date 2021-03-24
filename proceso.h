@@ -9,6 +9,7 @@ class Proceso
 {
 public:
     Proceso(int,int[2],int);
+    Proceso();
     ~Proceso();
     void iniciarEspera();
 
