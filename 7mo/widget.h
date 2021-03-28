@@ -2,6 +2,7 @@
 #define WIDGET_H
 
 #include <QWidget>
+#include <tallo.h>>
 #include <proceso.h>
 
 QT_BEGIN_NAMESPACE
@@ -25,9 +26,11 @@ private slots:
 
     void on_pushButton_5_clicked();
 
+    Tallo crearEstructura(int,int);
+
 private:
     Ui::Widget *ui;
     int cantidadTallos;
-    QVector <Proceso> tallos;
+    QVector <Tallo> tallos;
 };
 #endif // WIDGET_H

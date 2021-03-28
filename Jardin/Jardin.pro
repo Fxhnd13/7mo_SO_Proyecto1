@@ -11,14 +11,14 @@ CONFIG += c++11
 SOURCES += \
     main.cpp \
     proceso.cpp \
-    widget.cpp
+    ventana.cpp
 
 HEADERS += \
     proceso.h \
-    widget.h
+    ventana.h
 
 FORMS += \
-    widget.ui
+    ventana.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

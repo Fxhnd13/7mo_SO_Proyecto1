@@ -9,7 +9,7 @@ Widget::Widget(QWidget *parent)
 {
     ui->setupUi(this);
     this->cantidadTallos = 0;
-    this->tallos = QVector<Proceso>();
+    this->tallos = QVector<Tallo>();
 }
 
 Widget::~Widget()
@@ -20,7 +20,7 @@ Widget::~Widget()
 
 void Widget::on_realizarBtn_clicked()
 {
-    QString texto = ui->inputText->text();
+    /*QString texto = ui->inputText->text();
     texto.remove('('); texto.remove(')');
     if(texto.split(',').at(0) == "P" || texto.split(',').at(0) == "p"){
         QString cadenaEnviar;
@@ -30,7 +30,7 @@ void Widget::on_realizarBtn_clicked()
             //creamos la tuberia de comunicacion entre este proceso y su hijo (el tallo) que acabamos de crear
             int comunicacion[2];
             pipe(comunicacion);
-            proceso = Proceso(0,comunicacion,0);
+            proceso = Proceso(comunicacion);
             int pid_p = fork();
             if(pid_p < 0){
                 //error
@@ -63,7 +63,7 @@ void Widget::on_realizarBtn_clicked()
     }else{
         //¿mostrar algo? creo
     }
-    /* int p1,p2,p3;
+    int p1,p2,p3;
     QStringList parametros = texto.split(',');
     operacion = parametros[0].at(0);
     p1 = parametros[1].toInt();
@@ -77,12 +77,48 @@ void Widget::on_realizarBtn_clicked()
 
 //boton agregar tallo
 void Widget::on_pushButton_clicked(){
-    int indiceTallo = ui->inputText->text().split(',').at(0).toInt();
+    QStringList parametros = ui->inputText->text().split(',');
+    if(parametros.at(0).toInt() > this->cantidadTallos){//creamos
+        Tallo tallo = crearEstructura(parametros.at(1).toInt(), parametros.at(2).toInt());
+        Proceso procesoTallo = Proceso(tallo.getPipes().at(0));
+        int p = fork();
+        if(p < 0){
+            //error
+        }else if(p == 0){
+            for(int i = 0; i < tallo.getRamas(); i++){
+                Proceso rama = Proceso(tallo.getPipes().at(i+1));
+                int p2 = fork();
+                if(p2 < 0 ){
+                    //error
+                }else if(p2 == 0){
+                    for(int j = 0; j < tallo.getHojas(); j++){
+                        Proceso hoja = Proceso(tallo.getPipes().at(5+(i*10)+(j+1)));
+                        int p3 = fork();
+                        if(p3 < 0){
+                            //error
+                        }else if(p3 == 0){
+                            hoja.iniciarEspera();
+                            break;
+                        }
+                    }
+                    rama.iniciarEspera();
+                    break;
+                }
+            }
+            procesoTallo.iniciarEspera();
+        }
+        this->tallos.append(tallo);
+        this->cantidadTallos++;
+    }else{//modificamos
+        Tallo tallo = this->tallos.at(parametros.at(0).toInt()-1);
+
+    }
+    /* int indiceTallo = ui->inputText->text().split(',').at(0).toInt();
     int cantidadRamas = ui->inputText->text().split(',').at(1).toInt();
     int cantidadHojas = ui->inputText->text().split(',').at(2).toInt();
     int comunicacion[2];
     pipe(comunicacion);
-    Proceso tallo = Proceso(0,comunicacion,0);
+    Proceso tallo = Proceso(comunicacion);
     int p = fork();
     if(p < 0 ){
         //error
@@ -90,7 +126,7 @@ void Widget::on_pushButton_clicked(){
         for(int i = 0; i < cantidadRamas; i++){
             int comunicacionRama[2];
             pipe(comunicacionRama);
-            Proceso rama = Proceso(1,comunicacionRama,0);
+            Proceso rama = Proceso(comunicacionRama);
             int p2 = fork();
             if(p2 < 0 ){
                 //error
@@ -98,7 +134,7 @@ void Widget::on_pushButton_clicked(){
                 for(int j = 0; j < cantidadHojas; j++){
                     int comunicacionHoja[2];
                     pipe(comunicacionHoja);
-                    Proceso hoja = Proceso(2,comunicacionHoja,0);
+                    Proceso hoja = Proceso(comunicacionHoja);
                     int p3 = fork();
                     if(p3 < 0){
                         //error
@@ -115,6 +151,7 @@ void Widget::on_pushButton_clicked(){
     }
     this->tallos.append(tallo);
     this->cantidadTallos++;
+    */
 }
 
 //boton agregar rama
@@ -126,4 +163,27 @@ void Widget::on_pushButton_3_clicked(){
 //boton agregar hoja
 void Widget::on_pushButton_5_clicked(){
 
+}
+
+Tallo Widget::crearEstructura(int ramas, int hojas){
+    Tallo tallo = Tallo(ramas, hojas, QVector<Pipe>());
+    int tuberiaAlTallo[2];
+    pipe(tuberiaAlTallo);
+    Pipe comunicacionAlTallo = Pipe(tuberiaAlTallo);
+    tallo.getPipes().append(comunicacionAlTallo);
+    for(int i = 0; i < 5; i++){
+        int tuberia[2];
+        pipe(tuberia);
+        Pipe comunicacion = Pipe(tuberia);
+        tallo.getPipes().append(comunicacion);
+    }
+    for(int i = 0; i < 5; i++){
+        for(int j = 0; j < 10; j++){
+            int tuberia[2];
+            pipe(tuberia);
+            Pipe comunicacion = Pipe(tuberia);
+            tallo.getPipes().append(comunicacion);
+        }
+    }
+    return tallo;
 }
