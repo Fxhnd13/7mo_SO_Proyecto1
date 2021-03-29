@@ -9,6 +9,7 @@ class Tallo
 public:
     Tallo();
     Tallo(int,int,QVector<Pipe>);
+    Tallo(int,int,int);
     ~Tallo();
     int getRamas();
     int getHojas();
@@ -18,7 +19,7 @@ public:
     void setPipes(QVector<Pipe>);
 
 private:
-    int ramas, hojas;
+    int idTallo,ramas, hojas;
     QVector<Pipe> pipes;
 };
 

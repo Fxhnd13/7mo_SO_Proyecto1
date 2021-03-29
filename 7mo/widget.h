@@ -2,7 +2,8 @@
 #define WIDGET_H
 
 #include <QWidget>
-#include <tallo.h>>
+#include <QLabel>
+#include <tallo.h>
 #include <proceso.h>
 
 QT_BEGIN_NAMESPACE
@@ -19,18 +20,22 @@ public:
 
 private slots:
     void on_realizarBtn_clicked();
-
-    void on_pushButton_3_clicked();
-
-    void on_pushButton_clicked();
-
-    void on_pushButton_5_clicked();
-
     Tallo crearEstructura(int,int);
+    void pintarTallo(Tallo);
+    void pintarNegro(QLabel*);
+    void pintarCafe(QLabel*);
+    void pintarVerde(QLabel*);
+    void pintarTrans(QLabel*);
+    void cargarLabels();
+    void imprimirTallo(Tallo);
+    void escribir(QString);
+    void limpiarSalida();
 
 private:
     Ui::Widget *ui;
     int cantidadTallos;
     QVector <Tallo> tallos;
+    QVector <QLabel*> labelsRama;
+    QVector <QLabel*> labelsHoja;
 };
 #endif // WIDGET_H

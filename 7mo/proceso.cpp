@@ -13,7 +13,7 @@ Proceso::~Proceso(){
 
 void Proceso::iniciarEspera(){
     while(true){
-
+        sleep(1);
     }
 }
 

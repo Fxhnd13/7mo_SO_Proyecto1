@@ -5,6 +5,9 @@ Pipe::Pipe(int param[2]){
     this->pipes[0] = param[0];
     this->pipes[1] = param[1];
 }
+Pipe::~Pipe(){
+
+}
 
 int Pipe::getPipesEnvio(){
     return this->pipes[1];

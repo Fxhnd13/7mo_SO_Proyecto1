@@ -1,9 +1,17 @@
 #include "rama.h"
+#include <stdio.h>
+#include <unistd.h>
+#include <semaphore.h>
 
 Rama::Rama(int tallo,int rama,int hoja){
-    this->tallo = Rama;
+    this->tallo = tallo;
     this->rama = rama;
     this->hoja = hoja;
+    this->hijos = 0;
+}
+
+Rama::Rama(){
+
 }
 
 Rama::~Rama(){
@@ -15,17 +23,17 @@ void Rama::setSemaforoPadre(sem_t& semPadre){
 }
 
 void Rama::crearHojas(int hoja){
-    int pid = 1;
     for(int i = 0; i < hoja; i++){
         Hoja hoja = Hoja(this->tallo,this->rama,i+1);
-        agregarSemaforo(&hoja);
-        pid = fork();
+        agregarSemaforo(hoja);
+        int pid = fork();
         if(pid < 0 ){
             //error
         }else if(pid == 0){
             hoja.iniciarEspera();
             break;
         }
+        pidHijos[hijos++] = pid;
     }
     iniciarEspera();
 }
@@ -33,66 +41,67 @@ void Rama::crearHojas(int hoja){
 void Rama::iniciarEspera(){
     while(true){
         sem_wait(&semPadre);
-        for(int i = 0; i < pidHijos.size(); i++){
+        for(int i = 0; i < hijos; i++){
             //mandamos la señal al semaforo correspondiente
             postSemaforo(i);
             waitSemaforo(i);
         }
-        printf("Verificamos la rama %d-%d-%d",this->tallo, this->rama, this->hoja);
+        printf("Verificamos la rama %d-%d-%d\n",this->tallo,this->rama,this->hoja);
+
         sem_post(&semPadre);
     }
 }
 
 void Rama::agregarSemaforo(Hoja& hoja){
-    switch(pidHijos.size()){
+    switch(hijos){
         case 0:{
             sem_init(&sem0,1,1);
-            hoja.setSemaforoPadre(&sem0);
+            hoja.setSemaforoPadre(sem0);
             break;
         }
         case 1:{
             sem_init(&sem1,1,1);
-            hoja.setSemaforoPadre(&sem1);
+            hoja.setSemaforoPadre(sem1);
             break;
         }
         case 2:{
             sem_init(&sem2,1,1);
-            hoja.setSemaforoPadre(&sem2);
+            hoja.setSemaforoPadre(sem2);
             break;
         }
         case 3:{
             sem_init(&sem3,1,1);
-            hoja.setSemaforoPadre(&sem3);
+            hoja.setSemaforoPadre(sem3);
             break;
         }
         case 4:{
             sem_init(&sem4,1,1);
-            hoja.setSemaforoPadre(&sem4);
+            hoja.setSemaforoPadre(sem4);
             break;
         }
         case 5:{
             sem_init(&sem5,1,1);
-            hoja.setSemaforoPadre(&sem5);
+            hoja.setSemaforoPadre(sem5);
             break;
         }
         case 6:{
             sem_init(&sem6,1,1);
-            hoja.setSemaforoPadre(&sem6);
+            hoja.setSemaforoPadre(sem6);
             break;
         }
         case 7:{
             sem_init(&sem7,1,1);
-            hoja.setSemaforoPadre(&sem7);
+            hoja.setSemaforoPadre(sem7);
             break;
         }
         case 8:{
             sem_init(&sem8,1,1);
-            hoja.setSemaforoPadre(&sem8);
+            hoja.setSemaforoPadre(sem8);
             break;
         }
         case 9:{
             sem_init(&sem9,1,1);
-            hoja.setSemaforoPadre(&sem9);
+            hoja.setSemaforoPadre(sem9);
             break;
         }
     }

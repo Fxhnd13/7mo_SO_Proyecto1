@@ -4,6 +4,12 @@ Tallo::Tallo(){
 
 }
 
+Tallo::Tallo(int idTallo, int ramas, int hojas){
+    this->idTallo = idTallo;
+    this->ramas = ramas;
+    this->hojas = hojas;
+}
+
 Tallo::Tallo(int ramas,int hojas,QVector<Pipe> pipes){
     this->ramas = ramas;
     this->hojas = hojas;
